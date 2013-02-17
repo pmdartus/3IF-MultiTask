@@ -25,7 +25,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void InitInterface ( pid_t gene, int idSem, int memDuree, int idFile );
+void Interface ( pid_t gene, int idSem, int memDuree, int idFile );
 // Mode d'emploi :
 //  <gene>    : le pid du générateur de voiture
 //  <idSem>   : L'identificateur de sémaphore protégent la mémoire partagé
