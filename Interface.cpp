@@ -41,21 +41,21 @@ static int mySem;
 static int myBAL;
 
 //------------------------------------------------------ Fonctions privées
-//static type nom ( liste de parametres )
-// Mode d'emploi :
-//
-// Contrat :
-//
-// Algorithme :
-//
-//{
-//} //----- fin de nom
+void FermerInterface ()
+// Algorithme : Trivial
+{
+  // Detache la mémorie partagée avec le prcessus
+  shmdt(dureeFeux);
+
+  // On tue la tache dans l'oeuf
+  exit (0);
+}
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 
 void Interface ( pid_t gene, int idSem, int memDuree, int idFile )
-// Algorithme : Voir le dossier de spec
+// Algorithme : Trivial
 {
   //----------------------------
   // Initialisation 
@@ -89,7 +89,7 @@ void Commande (char code)
   {
     case 'F':
       // Destruction de la tache en cour et fin de l'application
-      exit (0);
+      FermerInterface();
     break;
 
     case 'G':
@@ -112,6 +112,7 @@ void Commande (char code)
 }
 
 void Commande (TypeVoie entree, TypeVoie sortie)
+// Algorithme : Creation de la voiture, du message puis ajout dans la BAL
 {
   Voiture aVoiture;
   MsgVoiture msg;
@@ -135,6 +136,7 @@ void Commande (TypeVoie entree, TypeVoie sortie)
 }
 
 void Commande (TypeVoie voie, unsigned int duree)
+// Algorithme : Trivial
 {
 
 }
