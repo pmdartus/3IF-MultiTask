@@ -10,25 +10,29 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include systeme
-#include <generateur.h>
-#include <voiture.h>
-#include <menu.h>
-#include <outils.h>
+#include <Generateur.h>
+#include <Voiture.h>
+#include <Menu.h>
+#include <Outils.h>
 
 #include <stdlib.h>
 #include <signal.h>
-#include <sys/type.h>
-#include <sys/shm>
-#include <sys/msb.h>
+#include <sys/types.h>
+#include <sys/shm.h>
+#include <sys/sem.h>
+#include <sys/msg.h>
+
+#include <iostream>
 
 using namespace std;
 
 //------------------------------------------------------ Include personnel
 #include "Interface.h"
+#include "Mere.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
-NUM_VOITURE_MAX = 299;
+
 //------------------------------------------------------------------ Types
 
 //---------------------------------------------------- Variables statiques
@@ -40,8 +44,10 @@ static int mySem;
 
 static int myBAL;
 
+static pid_t pidGene;
+
 //------------------------------------------------------ Fonctions privées
-void FermerInterface ()
+static void FermerInterface ()
 // Algorithme : Trivial
 {
   // Detache la mémorie partagée avec le prcessus
@@ -64,7 +70,8 @@ void Interface ( pid_t gene, int idSem, int memDuree, int idFile )
   // Init variables
   bGeneLaunched = false;
   numVoiture = 1;
-  myBal = idFile;
+  myBAL = idFile;
+  pidGene = gene;
 
   // Attachement de la mémoire partagé
   dureeFeux = (Duree *) shmat(memDuree, NULL, 0);
@@ -96,11 +103,11 @@ void Commande (char code)
     // Arret du generateur si actif actuellement, sinon mise en route du gene 
       if (bGeneLaunched==true)
       {
-        kill (gene, SIGSTOP);
+        kill (pidGene, SIGSTOP);
       }
       else 
       {
-        kill (gene, SIGCONT);
+        kill (pidGene, SIGCONT);
       }
     break;
 
@@ -109,6 +116,7 @@ void Commande (char code)
       Effacer(MESSAGE);
       Afficher(MESSAGE, "ERREUR | Commande non conforme");
     break;
+  }
 } //------ Fin de Commande (char code)
 
 void Commande (TypeVoie entree, TypeVoie sortie)
@@ -119,7 +127,14 @@ void Commande (TypeVoie entree, TypeVoie sortie)
   size_t msgSize;
 
   // Modification du numero de la voiture a creer
-  numVoiture<NUM_VOITURE_MAX : numVoiture += 1 , numVoiture = 1 ;
+  if (numVoiture < NUM_VOITURE_MAX)
+  {
+    numVoiture += 1 ;
+  }
+  else 
+  {
+    numVoiture = 1 ;
+  }
 
   // Mise en place de la voiture
   aVoiture.entree = entree;
@@ -130,7 +145,7 @@ void Commande (TypeVoie entree, TypeVoie sortie)
   msg.uneVoiture = aVoiture;
   msg.type = msg.uneVoiture.entree;
 
-  msgSize = size_of(MsgVoiture);
+  msgSize = sizeof(msg);
 
   msgsnd(myBAL, &msg, msgSize, 0);
 } //------ Fin de Commande (TypeVoie entree, TypeVoie sortie)
@@ -140,27 +155,34 @@ void Commande (TypeVoie voie, unsigned int duree)
 // est reposé
 {
   //Creation des SemBuf
-  struct sembuf duree_V = {SEM_DUREE, 1, 0};
-  struct sembuf duree_P = {SEM_DUREE, -1, 0};
+  sembuf duree_V;
+  duree_V.sem_num = mySem;
+  duree_V.sem_op = 1;
+  duree_V.sem_flg = 0;
 
-  if (voie == "NORD" || voie == "SUD")
+  sembuf duree_P;
+  duree_P.sem_num = mySem;
+  duree_P.sem_op = -1;
+  duree_P.sem_flg = 0;
+  
+
+  if (voie == NORD || voie == SUD)
   {
     semop(mySem, &duree_P, 1);
     dureeFeux->nS = duree;
     semop(mySem, &duree_V, 1);
   }
-  else if (voie == "OUEST" || voie == "EST")
+  else if (voie == OUEST || voie == EST)
   {
     semop(mySem, &duree_P, 1);
     dureeFeux->eO = duree;
     semop(mySem, &duree_V, 1);
   }
-  else 
+  else
   {
     // Nous avons un grâve problème !!
     Effacer(MESSAGE);
     Afficher(MESSAGE, "ERREUR | La voie demandée n'est pas valide");
-    sleep (10);
-    exit (1)
+    exit (1);
   }
 } //------ Fin de Commande ( TypeVoie voie, unsigned int duree)
