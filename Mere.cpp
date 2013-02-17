@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <Outils.h>
 #include <Heure.h>
+#include <Generateur.h>
 
 using namespace std;
 
@@ -30,12 +31,6 @@ using namespace std;
 //------------------------------------------------------------- Constantes
 
 //------------------------------------------------------------------ Types
-
-struct msgVoiture
-{
-    long type;
-    unsigned int numVoiture;
-};
 
 //---------------------------------------------------- Variables statiques
 
@@ -63,16 +58,13 @@ static void creerMemoires(int& etatFeux, int& duree)
 	duree = shmget(IPC_PRIVATE, sizeof(Duree), 0666 | IPC_CREAT);
 } //----- fin de creerMemoires
 
-static void creerBAL(int (&fileVoitures)[4])
+static void creerBAL(int& fileVoitures)
 // Mode d'emploi :
 // Crée les boites aux lettres contenant les files de voitures
 // Algorithme :
 // Trivial
 {
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        fileVoitures[i] = msgget(IPC_PRIVATE, 0666 | IPC_CREAT);
-    }
+    fileVoitures = msgget(IPC_PRIVATE, 0666 | IPC_CREAT);
 } //----- fin de creerBAL
 
 static void detruireMemoires(int duree, int etatFeux)
@@ -88,16 +80,13 @@ static void detruireMemoires(int duree, int etatFeux)
     shmctl(duree, IPC_RMID, 0);
 } //----- fin de detruireMemoires
 
-static void detruireBAL(int fileVoitures[4])
+static void detruireBAL(int fileVoitures)
 // Mode d'emploi :
 // Détruit les boites aux lettres
 // Algorithme :
 // Trivial
 {
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        msgctl(fileVoitures[i], IPC_RMID, 0);
-    }
+    msgctl(fileVoitures, IPC_RMID, 0);
 } //----- fin de detruireBAL
 
 //////////////////////////////////////////////////////////////////  PUBLIC
@@ -119,7 +108,7 @@ int main()
 
     int idEtatFeux;
     int idDuree;
-    int idFileVoiture[4];
+    int idFileVoiture;
 
     // Mise en place de la structure de donnée EtatFeux
     EtatFeux memEtatFeux;
@@ -143,9 +132,12 @@ int main()
     // Création de l'heure
     pidHeure = CreerEtActiverHeure();
 
+	// Création du générateur
+	pidGenerateur = CreerEtActiverGenerateur(0, idFileVoiture);
+
     if((pidInterface = fork()) == 0)
 	{
-		Interface(1, 1, idDuree, idFileVoiture[1]); 
+		Interface(pidGenerateur, 1, idDuree, idFileVoiture); 
 	}
 	else
 	{
@@ -154,6 +146,11 @@ int main()
 
 		// Destruction de l'heure
 		kill(pidHeure, SIGUSR2);
+		waitpid(pidHeure, NULL, 0);
+
+		// Destruction du générateur
+		kill(pidGenerateur, SIGUSR2);
+		waitpid(pidGenerateur, NULL, 0);
 
 		// Destruction de l'interface
 		TerminerApplication(true);
