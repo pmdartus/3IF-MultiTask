@@ -11,6 +11,8 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include systeme
 
+using namespace std;
+
 //------------------------------------------------------ Include personnel
 #include "Voie.h"
 
@@ -20,6 +22,10 @@
 //------------------------------------------------------------------ Types
 
 //---------------------------------------------------- Variables statiques
+static unsigned int nVoie;
+static EtatFeu * feux;
+
+int myBAL;
 
 //------------------------------------------------------ Fonctions privées
 //static type nom ( liste de parametres )
@@ -34,9 +40,17 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-//type Nom ( liste de parametres )
+void Voie( unsigned int numVoie, int idFeu, int idFile )
 // Algorithme :
 //
-//{
-//} //----- fin de Nom
+{
+
+  //----------------------------
+  // Initialisation 
+  //----------------------------
+
+  nVoie = numVoie;
+
+
+} //----- fin de Voie
 
