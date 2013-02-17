@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <sys/type.h>
 #include <sys/shm>
+#include <sys/msb.h>
 
 using namespace std;
 
@@ -32,10 +33,12 @@ NUM_VOITURE_MAX = 299;
 
 //---------------------------------------------------- Variables statiques
 static bool bGeneLaunched;
-static unsigned int numVoiture
+static unsigned int numVoiture;
 
-static Duree * dureeFeux
-static int mySem
+static Duree * dureeFeux;
+static int mySem;
+
+static int myBAL;
 
 //------------------------------------------------------ Fonctions privées
 //static type nom ( liste de parametres )
@@ -58,11 +61,15 @@ void Interface ( pid_t gene, int idSem, int memDuree, int idFile )
   // Initialisation 
   //----------------------------
 
+  // Init variables
   bGeneLaunched = false;
   numVoiture = 1;
+  myBal = idFile;
 
   // Attachement de la mémoire partagé
   dureeFeux = (Duree *) shmat(memDuree, NULL, 0);
+
+  // Gestion des semaphores
 
 
   //----------------------------
@@ -100,7 +107,7 @@ void Commande (char code)
     default:
     // Commande non reconnue par le parsseur
       Effacer(MESSAGE);
-      Afficher(MESSAGE, "Commande non conforme");
+      Afficher(MESSAGE, "ERREUR | Commande non conforme");
     break;
 }
 
@@ -108,6 +115,7 @@ void Commande (TypeVoie entree, TypeVoie sortie)
 {
   Voiture aVoiture;
   MsgVoiture msg;
+  size_t msgSize;
 
   // Modification du numero de la voiture a creer
   numVoiture<NUM_VOITURE_MAX : numVoiture += 1 , numVoiture = 1 ;
@@ -121,7 +129,9 @@ void Commande (TypeVoie entree, TypeVoie sortie)
   msg.uneVoiture = aVoiture;
   msg.type = msg.uneVoiture.entree;
 
+  msgSize = size_of(MsgVoiture);
 
+  msgsnd(myBAL, &msg, msgSize, 0);
 }
 
 void Commande (TypeVoie voie, unsigned int duree)
