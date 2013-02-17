@@ -14,6 +14,7 @@
 #include <sys/shm.h>
 #include <sys/types.h>
 #include <sys/msg.h>
+#include <sys/wait.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <Outils.h>
@@ -23,6 +24,7 @@ using namespace std;
 
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
+#include "Interface.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
@@ -141,19 +143,29 @@ int main()
     // Création de l'heure
     pidHeure = CreerEtActiverHeure();
 
-    sleep(10);
+    if((pidInterface = fork()) == 0)
+	{
+		Interface(1, 1, idDuree, idFileVoiture[1]); 
+	}
+	else
+	{
 
-    // Destruction de l'heure
-    kill(pidHeure, SIGUSR2);
+		waitpid(pidInterface, NULL, 0);
 
-    // Destruction de l'interface
-    TerminerApplication(true);
+		// Destruction de l'heure
+		kill(pidHeure, SIGUSR2);
 
-    // Destruction des zones de mémoires partagées
-    detruireMemoires(idEtatFeux, idDuree);
+		// Destruction de l'interface
+		TerminerApplication(true);
 
-    // Destruction des boites aux lettres
-    detruireBAL(idFileVoiture);
+		// Destruction des zones de mémoires partagées
+		detruireMemoires(idEtatFeux, idDuree);
+
+		// Destruction des boites aux lettres
+		detruireBAL(idFileVoiture);
+
+		exit(0);
+	}
 
 	return 0;
 } //----- fin de main

@@ -10,16 +10,16 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include systeme
-#include <generateur.h>
-#include <voiture.h>
-#include <menu.h>
-#include <outils.h>
+#include <Generateur.h>
+#include <Voiture.h>
+#include <Menu.h>
+#include <Outils.h>
 
 #include <stdlib.h>
 #include <signal.h>
-#include <sys/type.h>
-#include <sys/shm>
-#include <sys/msb.h>
+#include <sys/types.h>
+#include <sys/shm.h>
+#include <sys/msg.h>
 
 using namespace std;
 
