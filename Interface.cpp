@@ -80,7 +80,7 @@ void Interface ( pid_t gene, int idSem, int memDuree, int idFile )
   {
     Menu();
   }
-}
+} //------ Fin d'Interface
 
 void Commande (char code)
 // Algorithme : Trivial, une commande implique une action
@@ -109,7 +109,7 @@ void Commande (char code)
       Effacer(MESSAGE);
       Afficher(MESSAGE, "ERREUR | Commande non conforme");
     break;
-}
+} //------ Fin de Commande (char code)
 
 void Commande (TypeVoie entree, TypeVoie sortie)
 // Algorithme : Creation de la voiture, du message puis ajout dans la BAL
@@ -133,10 +133,34 @@ void Commande (TypeVoie entree, TypeVoie sortie)
   msgSize = size_of(MsgVoiture);
 
   msgsnd(myBAL, &msg, msgSize, 0);
-}
+} //------ Fin de Commande (TypeVoie entree, TypeVoie sortie)
 
 void Commande (TypeVoie voie, unsigned int duree)
-// Algorithme : Trivial
+// Algorithme : Prise du jeton, modification de la duree puis le jeton
+// est reposé
 {
+  //Creation des SemBuf
+  struct sembuf duree_V = {SEM_DUREE, 1, 0};
+  struct sembuf duree_P = {SEM_DUREE, -1, 0};
 
-}
+  if (voie == "NORD" || voie == "SUD")
+  {
+    semop(mySem, &duree_P, 1);
+    dureeFeux->nS = duree;
+    semop(mySem, &duree_V, 1);
+  }
+  else if (voie == "OUEST" || voie == "EST")
+  {
+    semop(mySem, &duree_P, 1);
+    dureeFeux->eO = duree;
+    semop(mySem, &duree_V, 1);
+  }
+  else 
+  {
+    // Nous avons un grâve problème !!
+    Effacer(MESSAGE);
+    Afficher(MESSAGE, "ERREUR | La voie demandée n'est pas valide");
+    sleep (10);
+    exit (1)
+  }
+} //------ Fin de Commande ( TypeVoie voie, unsigned int duree)
