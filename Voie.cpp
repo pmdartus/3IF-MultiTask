@@ -11,10 +11,18 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include systeme
 #include <vector>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/shm.h>
+
+#include <Voiture.h>
+#include <Outils.h>
+
 using namespace std;
 
 //------------------------------------------------------ Include personnel
 #include "Voie.h"
+#include "Mere.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
@@ -23,38 +31,20 @@ using namespace std;
 
 //---------------------------------------------------- Variables statiques
 static unsigned int nVoie;
-static EtatFeu * feux;
+static EtatFeux * feux;
 
 int myBAL;
 
 static std::vector<pid_t> vectDeplacement;
 
 //------------------------------------------------------ Fonctions privées
-TypeVoie getVoie (int numVoie)
-{
-  case (numVoie)
-  {
-    1 : 
-      return NORD;
-      break;
-    2 :
-      return EST ;
-      break;
-    3 :
-      return SUD ;
-      break;
-    4 :
-      return OUEST;
-      break;
-  }
-}
 
-void  finTache ()
+static void  FinTache ()
 {
 
 }
 
-void finDeplacement ()
+static void FinDeplacement ()
 {
 
 }
@@ -71,20 +61,23 @@ void Voie( unsigned int numVoie, int idFeu, int idFile )
   //----------------------------
 
   nVoie = numVoie;
-  struct sigaction finDeplacement;
 
   // Traitement  de la fin de la tache
   struct sigaction finTache;
-  finTache.sa_handler = finTache;
+  finTache.sa_handler = FinTache();
   sigemptyset(&finTache.sa_mask);
-  finTache.sa_flag = 0;
+  finTache.sa_flags = SA_RESTART;
   sigaction (SIGUSR2, &finTache, NULL);
 
   // Traitemet de la fin d'un déplacement
+  struct sigaction finDeplacement;
+  sigemptyset(&finDeplacement.sa_mask);
+  finTache.sa_flags = FinDeplacement();
+  sigaction (SIGCHLD, &finTache, NULL);
 
 
   // Attachement de la mémoire partagée
-  feux = (EtatFeu *) shmat(idFeu, NULL, 0);
+  feux = (EtatFeux *) shmat(idFeu, NULL, 0);
 
   //----------------------------
   // Moteur 

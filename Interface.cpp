@@ -155,12 +155,12 @@ void Commande (TypeVoie voie, unsigned int duree)
 // est reposé
 {
   //Creation des SemBuf
-  sembuf duree_V;
+  struct sembuf duree_V;
   duree_V.sem_num = mySem;
   duree_V.sem_op = 1;
   duree_V.sem_flg = 0;
 
-  sembuf duree_P;
+  struct sembuf duree_P;
   duree_P.sem_num = mySem;
   duree_P.sem_op = -1;
   duree_P.sem_flg = 0;
