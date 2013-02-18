@@ -141,7 +141,7 @@ static void initialisation()
 	majDuree();
 
 	// Les feux de l'axe Nord-Sud se mettent au vert
-	myMemDuree->nS = true;
+	myMemEtatFeux->nS = true;
 
 	// Affichage des couleurs initiales
 	Afficher(COULEUR_AXE_NS, VERT, GRAS, INVERSE);
