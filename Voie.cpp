@@ -63,17 +63,21 @@ void Voie( unsigned int numVoie, int idFeu, int idFile )
   nVoie = numVoie;
 
   // Traitement  de la fin de la tache
+  /*
   struct sigaction finTache;
   finTache.sa_handler = FinTache();
   sigemptyset(&finTache.sa_mask);
   finTache.sa_flags = SA_RESTART;
   sigaction (SIGUSR2, &finTache, NULL);
+  */
 
   // Traitemet de la fin d'un déplacement
+  /*
   struct sigaction finDeplacement;
   sigemptyset(&finDeplacement.sa_mask);
   finTache.sa_flags = FinDeplacement();
   sigaction (SIGCHLD, &finTache, NULL);
+  */
 
 
   // Attachement de la mémoire partagée

@@ -50,6 +50,9 @@ static pid_t pidGene;
 static void FermerInterface ()
 // Algorithme : Trivial
 {
+
+  Effacer(MESSAGE);
+  Afficher(MESSAGE, "Fermeture");
   // Detache la mémorie partagée avec le prcessus
   shmdt(dureeFeux);
 
@@ -104,10 +107,16 @@ void Commande (char code)
       if (bGeneLaunched==true)
       {
         kill (pidGene, SIGSTOP);
+        Effacer(ETAT_GENERATEUR);
+        Afficher(ETAT_GENERATEUR, "OFF");
+        bGeneLaunched = false ;
       }
       else 
       {
         kill (pidGene, SIGCONT);
+        Effacer(ETAT_GENERATEUR);
+        Afficher(ETAT_GENERATEUR, " ON");
+        bGeneLaunched = true ;
       }
     break;
 
@@ -148,6 +157,9 @@ void Commande (TypeVoie entree, TypeVoie sortie)
   msgSize = sizeof(msg);
 
   msgsnd(myBAL, &msg, msgSize, 0);
+
+  Effacer(MESSAGE);
+  Afficher(MESSAGE, "Voiture envoyée");
 } //------ Fin de Commande (TypeVoie entree, TypeVoie sortie)
 
 void Commande (TypeVoie voie, unsigned int duree)
