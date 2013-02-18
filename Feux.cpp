@@ -84,7 +84,7 @@ static void afficherDuree()
 	Afficher(DUREE_AXE_EO, dureeEO, STANDARD, NORMALE);
 }
 
-static void afficherNS(int duree)
+static void afficherNS(int duree, int dureeSup)
 // Mode d'emploi :
 //
 // Contrat :
@@ -93,10 +93,10 @@ static void afficherNS(int duree)
 //
 {
 	Afficher(TEMPS_AXE_NS, duree, STANDARD, NORMALE);
-	Afficher(TEMPS_AXE_EO, duree + DUREE_ARRET, STANDARD, NORMALE);
+	Afficher(TEMPS_AXE_EO, duree + dureeSup, STANDARD, NORMALE);
 }
 
-static void afficherEO(int duree)
+static void afficherEO(int duree, int dureeSup)
 // Mode d'emploi :
 //
 // Contrat :
@@ -105,7 +105,7 @@ static void afficherEO(int duree)
 //
 {
 	Afficher(TEMPS_AXE_EO, duree, STANDARD, NORMALE);
-	Afficher(TEMPS_AXE_NS, duree + DUREE_ARRET, STANDARD, NORMALE);
+	Afficher(TEMPS_AXE_NS, duree + dureeSup, STANDARD, NORMALE);
 }
 
 static void initialisation()
@@ -130,8 +130,8 @@ static void initialisation()
 	myMemDuree->nS = true;
 
 	// Affichage des couleurs initiales
-	Afficher(COULEUR_AXE_NS, "Vert", STANDARD, NORMALE);
-	Afficher(COULEUR_AXE_EO, "Rouge", STANDARD, NORMALE);
+	Afficher(COULEUR_AXE_NS, "Vert", GRAS, INVERSE);
+	Afficher(COULEUR_AXE_EO, "Rouge", GRAS, INVERSE);
 
 	// Affichage des durées initiales
 	Afficher(TEMPS_AXE_NS, dureeNS, STANDARD, NORMALE);
@@ -170,17 +170,24 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 
 	for( ; ; )
 	{
-		Afficher(COULEUR_AXE_NS, "Vert", STANDARD, NORMALE);
-		for(int i = dureeNS ; i >= 0 ; i--)
+		Afficher(COULEUR_AXE_NS, "Vert", GRAS, INVERSE);
+		for(int i = dureeNS ; i > 0 ; i--)
 		{
-			afficherNS(i);
+			afficherNS(i, DUREE_ARRET);
 			sleep(1);
 		}
 
-		Afficher(COULEUR_AXE_NS, "Orange", STANDARD, NORMALE);
-		for(int i = 3 ; i >= 0 ; i--)
+		Afficher(COULEUR_AXE_NS, "Orange", GRAS, INVERSE);
+		for(int i = 3 ; i > 0 ; i--)
 		{
-			afficherNS(i);
+			afficherNS(i, DUREE_ROUGE);
+			sleep(1);
+		}
+
+		Afficher(COULEUR_AXE_NS, "Rouge", GRAS, INVERSE);
+		for(int i = 2 ; i > 0 ; i--)
+		{
+			afficherNS(i, 0);
 			sleep(1);
 		}
 	}
