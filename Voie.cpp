@@ -109,6 +109,7 @@ void Voie( unsigned int numVoie, int idFeu, int idFile )
     // Etat d'attente bloquant
     while ( msgrcv(myBAL, &msg, TAILLE_MSG_VOITURE, (long)(nVoie), 0) < 0  )
     {
+      /*
       int imatriculation ;
       Voiture aVoiture = msg.uneVoiture;
       DessinerVoitureFeu(aVoiture.numero, aVoiture.entree, aVoiture.sortie);
@@ -125,6 +126,7 @@ void Voie( unsigned int numVoie, int idFeu, int idFile )
         {
         }
       }
+      */
 
       //OperationVoie (MOINS, numVoie) ;
 

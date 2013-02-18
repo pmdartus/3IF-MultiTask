@@ -160,6 +160,8 @@ void Commande (TypeVoie entree, TypeVoie sortie)
   // Display
   Effacer(MESSAGE);
   Afficher(MESSAGE, "Ajout de la voiture à la file");
+  OperationVoie (PLUS, entree) ;
+
 } //------ Fin de Commande (TypeVoie entree, TypeVoie sortie)
 
 void Commande (TypeVoie voie, unsigned int duree)
