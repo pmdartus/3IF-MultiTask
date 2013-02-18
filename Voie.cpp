@@ -97,17 +97,17 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
 
   // Traitement  de la fin de la tache
   
-  struct sigaction finTache;
-  finTache.sa_handler = FinTache;
-  finTache.sa_flags = 0;
-  sigaction (SIGUSR2, &finTache, NULL);
+  struct sigaction actionFinTache;
+  actionFinTache.sa_handler = finTache;
+  actionFinTache.sa_flags = 0;
+  sigaction (SIGUSR2, &actionFinTache, NULL);
 
   // Traitemet de la fin d'un déplacement
 
-  struct sigaction finDeplacement;
-  finTache.sa_handler = FinDeplacement;
-  finTache.sa_flags = 0;
-  sigaction (SIGCHLD, &finTache, NULL);
+  struct sigaction actionFinDeplacement;
+  actionFinTache.sa_handler = finDeplacement;
+  actionFinTache.sa_flags = 0;
+  sigaction (SIGCHLD, &actionFinTache, NULL);
 
 
 
