@@ -17,6 +17,10 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 
+#include <Outils.h>
+
+using namespace std;
+
 //------------------------------------------------------ Include personnel
 #include "Feux.h"
 #include "Mere.h"
@@ -24,12 +28,19 @@
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
+static const int DUREE_ORANGE = 3;
+static const int DUREE_ROUGE = 2;
+static const int DUREE_ARRET = DUREE_ORANGE + DUREE_ROUGE;
+
 //------------------------------------------------------------------ Types
 
 //---------------------------------------------------- Variables statiques
 static int myIdEtatFeux;
 static int myIdDuree;
 static int myIdSem;
+
+static int dureeEO;
+static int dureeNS;
 
 static Duree* myMemDuree;
 static EtatFeux* myMemEtatFeux;
@@ -61,6 +72,25 @@ static void destruction(int noSignal)
 	exit(0);
 } //----- fin de destruction
 
+static void initialiserAffichage()
+// Mode d'emploi :
+//
+// Contrat :
+//
+// Algorithme :
+//
+{
+	// Affichage des couleurs initiales
+	Afficher(COULEUR_AXE_NS, "Vert", STANDARD, NORMALE);
+	Afficher(COULEUR_AXE_EO, "Rouge", STANDARD, NORMALE);
+
+	// Affichage des durées initiales
+	Afficher(TEMPS_AXE_NS, dureeNS, STANDARD, NORMALE);
+	Afficher(TEMPS_AXE_EO, dureeNS + DUREE_ARRET, STANDARD, NORMALE);
+	Afficher(DUREE_AXE_NS, dureeNS, STANDARD, NORMALE);
+	Afficher(DUREE_AXE_EO, dureeEO, STANDARD, NORMALE);
+}
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 //type Nom ( liste de parametres )
@@ -82,14 +112,33 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 	fin.sa_flags = 0;
 	sigaction(SIGUSR2, &fin, NULL);
 
+	// Initialisation des IDs
 	myIdEtatFeux = etatFeux;
 	myIdDuree = duree;
 	myIdSem = sem;
 
+	// Attachement des zones de mémoires partagées
 	myMemEtatFeux = (EtatFeux*) shmat(myIdEtatFeux, NULL, 0);
 	myMemDuree = (Duree*) shmat(myIdDuree, NULL, 0);
 
-	for( ; ; );
+	// Initialisation des durées des feux
+	semop(myIdDuree, &reserver, 1);
+	dureeEO = myMemDuree->eO;
+	dureeNS = myMemDuree->nS;
+	semop(myIdDuree, &liberer, 1);
+
+	// Les feux de l'axe Nord-Sud se mettent au vert
+	myMemDuree->nS = true;
+
+	initialiserAffichage();
+
+	for( ; ; )
+	{
+		for(int i = dureeNS ; i > 3 ; i--)
+		{
+
+		}
+	}
 
 } //----- fin de ActiverFeux
 
