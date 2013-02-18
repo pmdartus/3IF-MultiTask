@@ -41,7 +41,7 @@ static std::vector<pid_t> vectDeplacement;
 
 //------------------------------------------------------ Fonctions privées
 
-static void  FinTache (int typeSignal)
+static void  handlerFinTache (int typeSignal)
 {
   if (typeSignal == SIGUSR2)
   {
@@ -65,7 +65,7 @@ static void  FinTache (int typeSignal)
   }
 }
 
-static void FinDeplacement (int typeSignal)
+static void handlerFinDeplacement (int typeSignal)
 {
   if (typeSignal == SIGCHLD)
   {
@@ -94,21 +94,21 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
   //----------------------------
 
   nVoie = numVoie;
+  myBAL = idFile ;
 
   // Traitement  de la fin de la tache
   
-  struct sigaction finTache;
-  finTache.sa_handler = FinTache;
-  finTache.sa_flags = 0;
-  sigaction (SIGUSR2, &finTache, NULL);
+  struct sigaction actionFinTache;
+  actionFinTache.sa_handler = handlerFinTache;
+  actionFinTache.sa_flags = 0;
+  sigaction (SIGUSR2, &actionFinTache, NULL);
 
   // Traitemet de la fin d'un déplacement
 
-  struct sigaction finDeplacement;
-  finTache.sa_handler = FinDeplacement;
-  finTache.sa_flags = 0;
-  sigaction (SIGCHLD, &finTache, NULL);
-
+  struct sigaction actionFinDeplacement;
+  actionFinTache.sa_handler = handlerFinDeplacement;
+  actionFinTache.sa_flags = 0;
+  sigaction (SIGCHLD, &actionFinTache, NULL);
 
 
   // Attachement de la mémoire partagée
@@ -124,9 +124,10 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
   for (;;)
   {
     // Attente de la prochaine voiture à traiter par la voie en question
-    // Etat d'attente bloquant
-    while ( msgrcv(myBAL, &msg, TAILLE_MSG_VOITURE, (long)(nVoie), 0) < 0  )
+    if(msgrcv(myBAL, &msg, TAILLE_MSG_VOITURE, numVoie, 1)!=-1)
     {
+      Effacer(MESSAGE);
+      Afficher(MESSAGE, "Reception");
       
       DessinerVoitureFeu(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
       OperationVoie (MOINS, numVoie);
@@ -147,7 +148,6 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
           vectDeplacement.push_back(voitureBouge);
         }
       }
-
     }
 
   }
