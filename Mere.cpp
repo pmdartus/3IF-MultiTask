@@ -116,7 +116,7 @@ int main()
     creerBAL(idFileVoiture);
 
 	// Création du sémaphore d'exclusion mutuelle
-	idSemFile = semget(IPC_PRIVATE, 1, IPC_CREAT);
+	//idSemFile = semget(IPC_PRIVATE, 1, IPC_CREAT);
 
 
     // Initialisation de l'application
