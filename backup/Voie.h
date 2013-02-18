@@ -25,7 +25,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-// type Nom ( liste de parametres );
+void Voie( unsigned int numVoie, int idFeu, int idFile );
 // Mode d'emploi :
 //
 // Contrat :

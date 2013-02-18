@@ -11,12 +11,16 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include systeme
 #include <unistd.h>
+
 #include <sys/shm.h>
 #include <sys/types.h>
 #include <sys/msg.h>
 #include <sys/wait.h>
+#include <sys/sem.h>
+
 #include <signal.h>
 #include <stdlib.h>
+
 #include <Outils.h>
 #include <Heure.h>
 #include <Generateur.h>
@@ -35,15 +39,6 @@ using namespace std;
 //---------------------------------------------------- Variables statiques
 
 //------------------------------------------------------ Fonctions privées
-//static type nom ( liste de parametres )
-// Mode d'emploi :
-//
-// Contrat :
-//
-// Algorithme :
-//
-//{
-//} //----- fin de nom
 
 static void creerMemoires(int& etatFeux, int& duree)
 // Mode d'emploi :
@@ -91,11 +86,6 @@ static void detruireBAL(int fileVoitures)
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-//type Nom ( liste de parametres )
-// Algorithme :
-//
-//{
-//} //----- fin de Nom
 
 int main()
 {
@@ -106,6 +96,7 @@ int main()
     pid_t pidDeplacement;
     pid_t pidGenerateur;
 
+	int idSemFile;
     int idEtatFeux;
     int idDuree;
     int idFileVoiture;
@@ -118,21 +109,15 @@ int main()
 	sigaction(SIGUSR2, &action, NULL);
 	sigaction(SIGCHLD, &action, NULL);
 
-    // Mise en place de la structure de donnée EtatFeux
-    EtatFeux memEtatFeux;
-    memEtatFeux.eO = false;
-    memEtatFeux.nS = false;
-
-    // Mise en place de la structure de donnée Durée
-    Duree memDuree;
-    memDuree.eO = 12;
-    memDuree.nS = 18;
-
     // Création des zones mémoires
     creerMemoires(idEtatFeux, idDuree);
 
     // Création des boites aux lettres
     creerBAL(idFileVoiture);
+
+	// Création du sémaphore d'exclusion mutuelle
+	idSemFile = semget(IPC_PRIVATE, 1, IPC_CREAT);
+
 
     // Initialisation de l'application
     InitialiserApplication(XTERM);

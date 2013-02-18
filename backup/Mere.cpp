@@ -11,42 +11,34 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include systeme
 #include <unistd.h>
+
 #include <sys/shm.h>
 #include <sys/types.h>
 #include <sys/msg.h>
+#include <sys/wait.h>
+#include <sys/sem.h>
+
 #include <signal.h>
 #include <stdlib.h>
+
 #include <Outils.h>
 #include <Heure.h>
+#include <Generateur.h>
 
 using namespace std;
 
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
+#include "Interface.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
 //------------------------------------------------------------------ Types
 
-struct msgVoiture
-{
-    long type;
-    unsigned int numVoiture;
-};
-
 //---------------------------------------------------- Variables statiques
 
 //------------------------------------------------------ Fonctions privées
-//static type nom ( liste de parametres )
-// Mode d'emploi :
-//
-// Contrat :
-//
-// Algorithme :
-//
-//{
-//} //----- fin de nom
 
 static void creerMemoires(int& etatFeux, int& duree)
 // Mode d'emploi :
@@ -61,16 +53,13 @@ static void creerMemoires(int& etatFeux, int& duree)
 	duree = shmget(IPC_PRIVATE, sizeof(Duree), 0666 | IPC_CREAT);
 } //----- fin de creerMemoires
 
-static void creerBAL(int (&fileVoitures)[4])
+static void creerBAL(int& fileVoitures)
 // Mode d'emploi :
 // Crée les boites aux lettres contenant les files de voitures
 // Algorithme :
 // Trivial
 {
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        fileVoitures[i] = msgget(IPC_PRIVATE, 0666 | IPC_CREAT);
-    }
+    fileVoitures = msgget(IPC_PRIVATE, 0666 | IPC_CREAT);
 } //----- fin de creerBAL
 
 static void detruireMemoires(int duree, int etatFeux)
@@ -86,25 +75,17 @@ static void detruireMemoires(int duree, int etatFeux)
     shmctl(duree, IPC_RMID, 0);
 } //----- fin de detruireMemoires
 
-static void detruireBAL(int fileVoitures[4])
+static void detruireBAL(int fileVoitures)
 // Mode d'emploi :
 // Détruit les boites aux lettres
 // Algorithme :
 // Trivial
 {
-    for(int i = 0 ; i < 4 ; i++)
-    {
-        msgctl(fileVoitures[i], IPC_RMID, 0);
-    }
+    msgctl(fileVoitures, IPC_RMID, 0);
 } //----- fin de detruireBAL
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-//type Nom ( liste de parametres )
-// Algorithme :
-//
-//{
-//} //----- fin de Nom
 
 int main()
 {
@@ -115,19 +96,18 @@ int main()
     pid_t pidDeplacement;
     pid_t pidGenerateur;
 
+	int idSemFile;
     int idEtatFeux;
     int idDuree;
-    int idFileVoiture[4];
+    int idFileVoiture;
 
-    // Mise en place de la structure de donnée EtatFeux
-    EtatFeux memEtatFeux;
-    memEtatFeux.eO = false;
-    memEtatFeux.nS = false;
+	// Masquage de SIGUSR2 et SIGCHLD
+	struct sigaction action;
 
-    // Mise en place de la structure de donnée Durée
-    Duree memDuree;
-    memDuree.eO = 12;
-    memDuree.nS = 18;
+	action.sa_handler = SIG_IGN;
+
+	sigaction(SIGUSR2, &action, NULL);
+	sigaction(SIGCHLD, &action, NULL);
 
     // Création des zones mémoires
     creerMemoires(idEtatFeux, idDuree);
@@ -135,25 +115,48 @@ int main()
     // Création des boites aux lettres
     creerBAL(idFileVoiture);
 
+	// Création du sémaphore d'exclusion mutuelle
+	idSemFile = semget(IPC_PRIVATE, 1, IPC_CREAT);
+
+
     // Initialisation de l'application
     InitialiserApplication(XTERM);
 
     // Création de l'heure
     pidHeure = CreerEtActiverHeure();
 
-    sleep(10);
+	// Création du générateur
+	pidGenerateur = CreerEtActiverGenerateur(0, idFileVoiture);
 
-    // Destruction de l'heure
-    kill(pidHeure, SIGUSR2);
+    if((pidInterface = fork()) == 0)
+	{
+		Interface(pidGenerateur, 1, idDuree, idFileVoiture); 
+	}
+	else
+	{
 
-    // Destruction de l'interface
-    TerminerApplication(true);
+		waitpid(pidInterface, NULL, 0);
 
-    // Destruction des zones de mémoires partagées
-    detruireMemoires(idEtatFeux, idDuree);
+		// Destruction du générateur
+		kill(pidGenerateur, SIGCONT);
+		kill(pidGenerateur, SIGUSR2);
+		waitpid(pidGenerateur, NULL, 0);
 
-    // Destruction des boites aux lettres
-    detruireBAL(idFileVoiture);
+		// Destruction de l'heure
+		kill(pidHeure, SIGUSR2);
+		waitpid(pidHeure, NULL, 0);
+
+		// Destruction des zones de mémoires partagées
+		detruireMemoires(idEtatFeux, idDuree);
+
+		// Destruction des boites aux lettres
+		detruireBAL(idFileVoiture);
+
+        // Destruction de l'interface
+        TerminerApplication(true);
+        
+		exit(0);
+	}
 
 	return 0;
 } //----- fin de main
