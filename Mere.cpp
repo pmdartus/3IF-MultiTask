@@ -110,6 +110,14 @@ int main()
     int idDuree;
     int idFileVoiture;
 
+	// Masquage de SIGUSR2 et SIGCHLD
+	struct sigaction action;
+
+	action.sa_handler = SIG_IGN;
+
+	sigaction(SIGUSR2, &action, NULL);
+	sigaction(SIGCHLD, &action, NULL);
+
     // Mise en place de la structure de donnée EtatFeux
     EtatFeux memEtatFeux;
     memEtatFeux.eO = false;
@@ -144,13 +152,14 @@ int main()
 
 		waitpid(pidInterface, NULL, 0);
 
+		// Destruction du générateur
+		kill(pidGenerateur, SIGCONT);
+		kill(pidGenerateur, SIGUSR2);
+		waitpid(pidGenerateur, NULL, 0);
+
 		// Destruction de l'heure
 		kill(pidHeure, SIGUSR2);
 		waitpid(pidHeure, NULL, 0);
-
-		// Destruction du générateur
-		kill(pidGenerateur, SIGUSR2);
-		waitpid(pidGenerateur, NULL, 0);
 
 		// Destruction des zones de mémoires partagées
 		detruireMemoires(idEtatFeux, idDuree);

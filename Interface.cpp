@@ -45,12 +45,13 @@ static int myBAL;
 static pid_t pidGene;
 
 //------------------------------------------------------ Fonctions privées
-static void FermerInterface ()
+static void fermerInterface ()
 // Algorithme : Trivial
 {
 
   Effacer(MESSAGE);
   Afficher(MESSAGE, "Fermeture");
+
   // Detache la mémorie partagée avec le prcessus
   shmdt(dureeFeux);
 
@@ -96,40 +97,44 @@ void Commande (char code)
   {
     case CMD_FERMETURE :
       // Destruction de la tache en cour et fin de l'application
-      FermerInterface();
+      fermerInterface();
     break;
 
     case CMD_GENE :
-    // Arret du generateur si actif actuellement, sinon mise en route du gene 
-      if (bGeneLaunched==true)
-      {
-        kill (pidGene, SIGSTOP);
+	{
+		// Arret du generateur si actif actuellement, sinon mise en route du gene 
+		if (bGeneLaunched==true)
+		{
+			kill (pidGene, SIGSTOP);
 
-        // Display
-        Effacer(ETAT_GENERATEUR);
-        Afficher(ETAT_GENERATEUR, "OFF");
-        Effacer(MESSAGE);
-        Afficher(MESSAGE, "Arret du generateur");
-        bGeneLaunched = false ;
-      }
-      else 
-      {
-        kill (pidGene, SIGCONT);
+			// Display
+			Effacer(ETAT_GENERATEUR);
+			Afficher(ETAT_GENERATEUR, "OFF");
+			Effacer(MESSAGE);
+			Afficher(MESSAGE, "Arret du generateur");
+			bGeneLaunched = false ;
+		}
+		else 
+		{
+			kill (pidGene, SIGCONT);
 
-        // Display
-        Effacer(ETAT_GENERATEUR);
-        Afficher(ETAT_GENERATEUR, " ON");
-        Effacer(MESSAGE);
-        Afficher(MESSAGE, "Mise en route du generateur");
-        bGeneLaunched = true ;
-      }
-    break;
+			// Display
+			Effacer(ETAT_GENERATEUR);
+			Afficher(ETAT_GENERATEUR, " ON");
+			Effacer(MESSAGE);
+			Afficher(MESSAGE, "Mise en route du generateur");
+			bGeneLaunched = true ;
+		}
+		break;
+	}
 
     default:
-    // Commande non reconnue par le parsseur
-      Effacer(MESSAGE);
-      Afficher(MESSAGE, "On est dans la merde !");
-    break;
+	{
+		// Commande non reconnue par le parsseur
+		Effacer(MESSAGE);
+		Afficher(MESSAGE, "On est dans la merde !");
+		break;
+	}
   }
 } //------ Fin de Commande (char code)
 
