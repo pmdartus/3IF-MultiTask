@@ -12,7 +12,8 @@
 
 //------------------------------------------------------------------------
 // Rôle de la tache <Mere>
-//
+// Tâche moteur du programme. Gère la création et la destruction des
+// tâches filles.
 //
 //------------------------------------------------------------------------
 
@@ -23,25 +24,32 @@
 
 //------------------------------------------------------------------ Types
 
+// Etats des Feux
+// état :
+//	- faux : feu rouge/orange
+//	- vrai : feu vert
+//
+// eO : axe Est-Ouest
+// nS : axe Nord-Sud
 struct EtatFeux
 {
     bool eO;
     bool nS;
 };
 
+
+// Durée des Feux
+// eO : axe Est-Ouest
+// nS : axe Nord-Sud
 struct Duree
 {
     int eO;
     int nS;
 };
 
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-// type Nom ( liste de parametres );
-// Mode d'emploi :
-//
-// Contrat :
-//
 
 int main();
 // Mode d'emploi :

@@ -44,7 +44,10 @@ using namespace std;
 
 static void creerMemoires(int& etatFeux, int& duree)
 // Mode d'emploi :
-// Crée les zones de mémoires partagées
+// Créé et initialise les zones de mémoires partagées
+// <etatFeux> : id de la zone mémoire partagée contenant l'état des feux
+// <duree> : id de la zone mémoire partagée contenant la durée des feux
+//
 // Alogrithme :
 // Trivial
 {
@@ -53,11 +56,26 @@ static void creerMemoires(int& etatFeux, int& duree)
 
 	// Création de la zone de mémoire Duree
 	duree = shmget(IPC_PRIVATE, sizeof(Duree), 0666 | IPC_CREAT);
+
+	// Initialisation de EtatFeux
+	EtatFeux* memEtatFeux = (EtatFeux*) shmat(etatFeux, NULL, 0);
+	memEtatFeux->eO = false;
+	memEtatFeux->nS = false;
+	shmdt(memEtatFeux);
+
+	// Initialisation de Duree
+	Duree* memDuree = (Duree*) shmat(duree, NULL, 0);
+	memDuree->eO = 12;
+	memDuree->nS = 18;
+	shmdt(memDuree);
+
 } //----- fin de creerMemoires
 
 static void creerBAL(int& fileVoitures)
 // Mode d'emploi :
 // Crée les boites aux lettres contenant les files de voitures
+// <fileVoitures> : id de la BAL contenant les voitures
+//
 // Algorithme :
 // Trivial
 {
@@ -67,6 +85,9 @@ static void creerBAL(int& fileVoitures)
 static void detruireMemoires(int duree, int etatFeux)
 // Mode d'emploi :
 // Détruit les zones de mémoires partagées
+// <etatFeux> : id de la zone mémoire partagée contenant l'état des feux
+// <duree> : id de la zone mémoire partagée contenant la durée des feux
+//
 // Algorithme :
 // Trivial
 {
@@ -80,6 +101,8 @@ static void detruireMemoires(int duree, int etatFeux)
 static void detruireBAL(int fileVoitures)
 // Mode d'emploi :
 // Détruit les boites aux lettres
+// <fileVoitures> : id de la BAL contenant les voitures
+//
 // Algorithme :
 // Trivial
 {
@@ -90,6 +113,17 @@ static void detruireBAL(int fileVoitures)
 //---------------------------------------------------- Fonctions publiques
 
 int main()
+// Mode d'emploi :
+// Corps du programme
+//
+// Algorithme :
+// - Mise en place des zones de mémoires partagées, boîtes aux lettres et sémaphores
+// - Création du générateur et de l'heure
+// - Création du feux
+// - Création des voies
+// - Création de l'interface
+// - Attente de la fin de l'interface
+// - Destruction dans l'ordre inverse de création
 {
     pid_t pidHeure;
     pid_t pidInterface;
