@@ -152,15 +152,15 @@ int main()
 		kill(pidGenerateur, SIGUSR2);
 		waitpid(pidGenerateur, NULL, 0);
 
-		// Destruction de l'interface
-		TerminerApplication(true);
-
 		// Destruction des zones de mémoires partagées
 		detruireMemoires(idEtatFeux, idDuree);
 
 		// Destruction des boites aux lettres
 		detruireBAL(idFileVoiture);
 
+        // Destruction de l'interface
+        TerminerApplication(true);
+        
 		exit(0);
 	}
 
