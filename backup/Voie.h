@@ -18,6 +18,7 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //--------------------------------------------------- Interfaces utilisees
+#include <Outils.h>
 
 //------------------------------------------------------------- Constantes
 
@@ -25,7 +26,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Voie( unsigned int numVoie, int idFeu, int idFile );
+void Voie( TypeVoie numVoie, int idFeu, int idFile );
 // Mode d'emploi :
 //
 // Contrat :

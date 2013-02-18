@@ -99,6 +99,7 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
   
   struct sigaction actionFinTache;
   actionFinTache.sa_handler = finTache;
+  sigemptyset(&actionFinTache.sa_mask);
   actionFinTache.sa_flags = 0;
   sigaction (SIGUSR2, &actionFinTache, NULL);
 
@@ -106,6 +107,7 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
 
   struct sigaction actionFinDeplacement;
   actionFinTache.sa_handler = finDeplacement;
+  sigemptyset(&actionFinDeplacement.sa_mask);
   actionFinTache.sa_flags = 0;
   sigaction (SIGCHLD, &actionFinTache, NULL);
 

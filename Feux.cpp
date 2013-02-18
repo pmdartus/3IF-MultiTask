@@ -121,6 +121,8 @@ static void majDuree()
 {
 	semop(myIdDuree, &reserver, 1);
 	dureeEO = myMemDuree->eO;
+	semop(myIdDuree, &liberer, 1);
+	semop(myIdDuree, &reserver, 1);
 	dureeNS = myMemDuree->nS;
 	semop(myIdDuree, &liberer, 1);
 } //----- fin de majDuree
@@ -141,7 +143,7 @@ static void initialisation()
 	majDuree();
 
 	// Les feux de l'axe Nord-Sud se mettent au vert
-	myMemDuree->nS = true;
+	myMemEtatFeux->nS = true;
 
 	// Affichage des couleurs initiales
 	Afficher(COULEUR_AXE_NS, VERT, GRAS, INVERSE);
@@ -196,7 +198,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 
 		Afficher(COULEUR_AXE_NS, ORANGE, STANDARD, NORMALE);
 		// Inversion de l'état de l'état du feu N-S
-		myMemEtatFeux->nS ^= true;
+		myMemEtatFeux->nS = false;
 		for(int i = 3 ; i > 0 ; i--)
 		{
 			afficherNS(i, DUREE_ROUGE);
@@ -214,7 +216,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 		afficherDuree();
 
 		// Inversion de l'état du feux E-O
-		myMemEtatFeux->eO ^= true;
+		myMemEtatFeux->eO = true;
 
 		Afficher(COULEUR_AXE_EO, VERT, STANDARD, NORMALE);
 		for(int i = dureeEO ; i > 0 ; i--)
@@ -225,7 +227,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 
 		Afficher(COULEUR_AXE_EO, ORANGE, STANDARD, NORMALE);
 		// Inversion de l'état de l'état du feux E-O
-		myMemEtatFeux->eO ^= true;
+		myMemEtatFeux->eO = false;
 		for(int i = 3 ; i > 0 ; i--)
 		{
 			afficherEO(i, DUREE_ROUGE);
@@ -240,7 +242,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 		}
 
 		// Inversion de l'état de l'état du feu N-S
-		myMemEtatFeux->nS ^= true;
+		myMemEtatFeux->nS = true;
 	}
 
 } //----- fin de ActiverFeux

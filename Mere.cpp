@@ -180,29 +180,25 @@ int main()
 		// Création des voies
 		if((pidVoie[0] = fork()) == 0)
 		{
-			//Voie(0);
-			for( ; ; );
+			Voie(NORD, idEtatFeux, idFileVoiture);
 		}
 		else
 		{
 			if((pidVoie[1] = fork()) == 0)
 			{
-				//Voie(1);
-				for( ; ; );
+				Voie(SUD, idEtatFeux, idFileVoiture);
 			}
 			else
 			{
 				if((pidVoie[2] = fork()) == 0)
 				{
-					//Voie(2);
-					for( ; ; );
+					Voie(EST, idEtatFeux, idFileVoiture);
 				}
 				else
 				{
 					if((pidVoie[3] = fork()) == 0)
 					{
-						//Voie(3);
-						for( ; ; );
+						Voie(OUEST, idEtatFeux, idFileVoiture);
 					}
 					else
 					{
@@ -221,7 +217,7 @@ int main()
 							// Destruction des voies
 							for(int i = 0 ; i < 4 ; i++)
 							{
-								kill(pidVoie[i], SIGKILL);
+								kill(pidVoie[i], SIGUSR2);
 								waitpid(pidVoie[i], NULL, 0);
 							}
 
