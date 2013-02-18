@@ -41,7 +41,7 @@ static std::vector<pid_t> vectDeplacement;
 
 //------------------------------------------------------ Fonctions privées
 
-static void  FinTache (int typeSignal)
+static void  finTache (int typeSignal)
 {
   if (typeSignal == SIGUSR2)
   {
@@ -65,7 +65,7 @@ static void  FinTache (int typeSignal)
   }
 }
 
-static void FinDeplacement (int typeSignal)
+static void finDeplacement (int typeSignal)
 {
   if (typeSignal == SIGCHLD)
   {
