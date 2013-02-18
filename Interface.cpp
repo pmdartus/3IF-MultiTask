@@ -22,8 +22,6 @@
 #include <sys/sem.h>
 #include <sys/msg.h>
 
-#include <iostream>
-
 using namespace std;
 
 //------------------------------------------------------ Include personnel
@@ -109,6 +107,8 @@ void Commande (char code)
         kill (pidGene, SIGSTOP);
         Effacer(ETAT_GENERATEUR);
         Afficher(ETAT_GENERATEUR, "OFF");
+        Effacer(MESSAGE);
+        Afficher(MESSAGE, "Arret du generateur");
         bGeneLaunched = false ;
       }
       else 
@@ -116,6 +116,8 @@ void Commande (char code)
         kill (pidGene, SIGCONT);
         Effacer(ETAT_GENERATEUR);
         Afficher(ETAT_GENERATEUR, " ON");
+        Effacer(MESSAGE);
+        Afficher(MESSAGE, "Mise en route du generateur");
         bGeneLaunched = true ;
       }
     break;
@@ -158,8 +160,9 @@ void Commande (TypeVoie entree, TypeVoie sortie)
 
   msgsnd(myBAL, &msg, msgSize, 0);
 
+  // Display
   Effacer(MESSAGE);
-  Afficher(MESSAGE, "Voiture envoyée");
+  Afficher(MESSAGE, "Ajout de la voiture à la file");
 } //------ Fin de Commande (TypeVoie entree, TypeVoie sortie)
 
 void Commande (TypeVoie voie, unsigned int duree)
@@ -183,12 +186,20 @@ void Commande (TypeVoie voie, unsigned int duree)
     semop(mySem, &duree_P, 1);
     dureeFeux->nS = duree;
     semop(mySem, &duree_V, 1);
+
+    // Display
+    Effacer(MESSAGE);
+    Afficher(MESSAGE, "Axe NS modification de la duree du Feux");
   }
   else if (voie == OUEST || voie == EST)
   {
     semop(mySem, &duree_P, 1);
     dureeFeux->eO = duree;
     semop(mySem, &duree_V, 1);
+
+    // Display
+    Effacer(MESSAGE);
+    Afficher(MESSAGE, "Axe EO modification de la duree du Feux");
   }
   else
   {
