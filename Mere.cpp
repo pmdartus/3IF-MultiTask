@@ -10,14 +10,13 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include systeme
-#include <unistd.h>
-
 #include <sys/shm.h>
 #include <sys/types.h>
 #include <sys/msg.h>
 #include <sys/wait.h>
 #include <sys/sem.h>
 
+#include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
 
@@ -142,12 +141,12 @@ int main()
 
 	maskUSR2.sa_handler = SIG_IGN;
 	sigemptyset(&maskUSR2.sa_mask);
-	maskUSR2.sa_flags=0;
+	maskUSR2.sa_flags = 0;
 	sigaction(SIGUSR2,&maskUSR2, NULL);
 
 	maskCHLD.sa_handler = SIG_IGN;
 	sigemptyset(&maskCHLD.sa_mask);
-	maskCHLD.sa_flags=0;
+	maskCHLD.sa_flags = 0;
 	sigaction(SIGCHLD,&maskCHLD, NULL);
 	// Fin de l'opération de masquage
 
@@ -174,8 +173,7 @@ int main()
 	// Création de Feux
 	if((pidFeux = fork()) == 0)
 	{
-		//Feux();
-		for( ; ; );
+		ActiverFeux(idEtatFeux, idDuree, idSem);
 	}
 	else
 	{
@@ -228,7 +226,7 @@ int main()
 							}
 
 							// Destruction de Feux
-							kill(pidFeux, SIGKILL);
+							kill(pidFeux, SIGUSR2);
 							waitpid(pidFeux, NULL, 0);
 
 							// Destruction du générateur

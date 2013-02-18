@@ -12,7 +12,7 @@
 
 //------------------------------------------------------------------------
 // Rôle de la tache <Feux>
-//
+// Gère le changement de couleur des feux.
 //
 //------------------------------------------------------------------------
 
@@ -25,11 +25,18 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-// type Nom ( liste de parametres );
+
+void ActiverFeux(int etatFeux, int duree, int sem);
 // Mode d'emploi :
+//	<etatFeux>	: id de la zone mémoire partagée contenant l'état des feux
+//	<duree>		: id de la zone mémoire partagée contenant la durée des 
+//				  feux
+//	<sem>		: id du sémaphore d'exclusion mutuelle liée à la zone de 
+//				  mémoire durée
+// - lance les feux
 //
 // Contrat :
-//
+// - les zones mémoires doivent être préalablement créée
 
 #endif // FEUX_H
 
