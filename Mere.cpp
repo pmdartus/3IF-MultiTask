@@ -30,6 +30,8 @@ using namespace std;
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
 #include "Interface.h"
+#include "Voie.h"
+#include "Feux.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
@@ -93,21 +95,27 @@ int main()
     pid_t pidInterface;
     pid_t pidVoie[4];
     pid_t pidFeux;
-    pid_t pidDeplacement;
     pid_t pidGenerateur;
 
-	int idSemFile;
+	int idSem;
     int idEtatFeux;
     int idDuree;
     int idFileVoiture;
 
 	// Masquage de SIGUSR2 et SIGCHLD
-	struct sigaction action;
+	struct sigaction maskUSR2;
+	struct sigaction maskCHLD;
 
-	action.sa_handler = SIG_IGN;
+	maskUSR2.sa_handler = SIG_IGN;
+	sigemptyset(&maskUSR2.sa_mask);
+	maskUSR2.sa_flags=0;
+	sigaction(SIGUSR2,&maskUSR2, NULL);
 
-	sigaction(SIGUSR2, &action, NULL);
-	sigaction(SIGCHLD, &action, NULL);
+	maskCHLD.sa_handler = SIG_IGN;
+	sigemptyset(&maskCHLD.sa_mask);
+	maskCHLD.sa_flags=0;
+	sigaction(SIGCHLD,&maskCHLD, NULL);
+	// Fin de l'opération de masquage
 
     // Création des zones mémoires
     creerMemoires(idEtatFeux, idDuree);
@@ -116,7 +124,8 @@ int main()
     creerBAL(idFileVoiture);
 
 	// Création du sémaphore d'exclusion mutuelle
-	//idSemFile = semget(IPC_PRIVATE, 1, IPC_CREAT);
+	idSem = semget(IPC_PRIVATE, 1, IPC_CREAT | 0666);
+	semctl(idSem, 0, SETVAL, 1);
 
 
     // Initialisation de l'application
@@ -128,34 +137,93 @@ int main()
 	// Création du générateur
 	pidGenerateur = CreerEtActiverGenerateur(0, idFileVoiture);
 
-    if((pidInterface = fork()) == 0)
+	// Création de Feux
+	if((pidFeux = fork()) == 0)
 	{
-		Interface(pidGenerateur, 1, idDuree, idFileVoiture); 
+		//Feux();
+		for( ; ; );
 	}
 	else
 	{
+		// Création des voies
+		if((pidVoie[0] = fork()) == 0)
+		{
+			//Voie(0);
+			for( ; ; );
+		}
+		else
+		{
+			if((pidVoie[1] = fork()) == 0)
+			{
+				//Voie(1);
+				for( ; ; );
+			}
+			else
+			{
+				if((pidVoie[2] = fork()) == 0)
+				{
+					//Voie(2);
+					for( ; ; );
+				}
+				else
+				{
+					if((pidVoie[3] = fork()) == 0)
+					{
+						//Voie(3);
+						for( ; ; );
+					}
+					else
+					{
 
-		waitpid(pidInterface, NULL, 0);
+						// Lancement de l'interface
+						if((pidInterface = fork()) == 0)
+						{
+							Interface(pidGenerateur, idSem, idDuree, idFileVoiture); 
+						}
+						else
+						{
 
-		// Destruction du générateur
-		kill(pidGenerateur, SIGCONT);
-		kill(pidGenerateur, SIGUSR2);
-		waitpid(pidGenerateur, NULL, 0);
+							// Synchronisation de fin
+							waitpid(pidInterface, NULL, 0);
 
-		// Destruction de l'heure
-		kill(pidHeure, SIGUSR2);
-		waitpid(pidHeure, NULL, 0);
+							// Destruction des voies
+							for(int i = 0 ; i < 4 ; i++)
+							{
+								kill(pidVoie[i], SIGKILL);
+								waitpid(pidVoie[i], NULL, 0);
+							}
 
-		// Destruction des zones de mémoires partagées
-		detruireMemoires(idEtatFeux, idDuree);
+							// Destruction de Feux
+							kill(pidFeux, SIGKILL);
+							waitpid(pidFeux, NULL, 0);
 
-		// Destruction des boites aux lettres
-		detruireBAL(idFileVoiture);
+							// Destruction du générateur
+							kill(pidGenerateur, SIGCONT);
+							kill(pidGenerateur, SIGUSR2);
+							waitpid(pidGenerateur, NULL, 0);
 
-        // Destruction de l'interface
-        TerminerApplication(true);
+							// Destruction de l'heure
+							kill(pidHeure, SIGUSR2);
+							waitpid(pidHeure, NULL, 0);
+
+							// Destruction du sémaphore
+							semctl(idSem, 0, IPC_RMID, 0);
+
+							// Destruction des zones de mémoires partagées
+							detruireMemoires(idEtatFeux, idDuree);
+
+							// Destruction des boites aux lettres
+							detruireBAL(idFileVoiture);
+
+							// Destruction de l'interface
+							TerminerApplication(true);
         
-		exit(0);
+							exit(0);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	return 0;
