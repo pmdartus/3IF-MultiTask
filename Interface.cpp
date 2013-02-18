@@ -150,9 +150,7 @@ void Commande (TypeVoie entree, TypeVoie sortie)
   struct Voiture aVoiture = {entree, sortie, numVoiture};
   struct MsgVoiture msg = {(long)(entree), aVoiture};
 
-  size_t msgSize = sizeof(msg);
-
-  msgsnd(myBAL, &msg, msgSize, 0);
+  msgsnd(myBAL, &msg, TAILLE_MSG_VOITURE, 0);
 
   // Display
   Effacer(MESSAGE);

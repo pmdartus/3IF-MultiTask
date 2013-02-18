@@ -14,6 +14,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/shm.h>
+#include <sys/msg.h>
 
 #include <Voiture.h>
 #include <Outils.h>
@@ -39,14 +40,28 @@ static std::vector<pid_t> vectDeplacement;
 
 //------------------------------------------------------ Fonctions privées
 
-static void  FinTache ()
+static void  FinTache (int typeSignal)
 {
+  if (typeSignal == SIGUSR2)
+  {
+    // Détachement de la mémoire
+    shmdt (feux);
 
+    // Suppression des déplacements restants
+
+    // Supression handlers
+
+    // Fin de la tache
+  }
 }
 
-static void FinDeplacement ()
+static void FinDeplacement (int typeSignal)
 {
-
+  if (typeSignal == SIGCHLD)
+  {
+    // Supression dans la liste des deplacement de la voiture ayant finis
+    // son déplacement
+  }
 }
 
 //////////////////////////////////////////////////////////////////  PUBLIC
@@ -63,25 +78,26 @@ void Voie( unsigned int numVoie, int idFeu, int idFile )
   nVoie = numVoie;
 
   // Traitement  de la fin de la tache
-  /*
+  
   struct sigaction finTache;
-  finTache.sa_handler = FinTache();
-  sigemptyset(&finTache.sa_mask);
-  finTache.sa_flags = SA_RESTART;
+  finTache.sa_handler = FinTache;
+  finTache.sa_flags = 0;
   sigaction (SIGUSR2, &finTache, NULL);
-  */
 
   // Traitemet de la fin d'un déplacement
-  /*
+
   struct sigaction finDeplacement;
-  sigemptyset(&finDeplacement.sa_mask);
-  finTache.sa_flags = FinDeplacement();
+  finTache.sa_handler = FinDeplacement;
+  finTache.sa_flags = 0;
   sigaction (SIGCHLD, &finTache, NULL);
-  */
+
 
 
   // Attachement de la mémoire partagée
   feux = (EtatFeux *) shmat(idFeu, NULL, 0);
+
+  // Réception d'un message
+  struct msgbuf msg;
 
   //----------------------------
   // Moteur 
@@ -89,6 +105,12 @@ void Voie( unsigned int numVoie, int idFeu, int idFile )
 
   for (;;)
   {
+    // Attente de la prochaine voiture à traiter par la voie en question
+    // Etat d'attente bloquant
+    while ( msgrcv(myBAL, &msg, TAILLE_MSG_VOITURE, (long)(nVoie), 0) < 0  )
+    {
+
+    }
 
   }
 } //----- fin de Voie
