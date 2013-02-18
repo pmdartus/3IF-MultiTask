@@ -84,10 +84,9 @@ void Interface ( pid_t gene, int idSem, int memDuree, int idFile )
   // Moteur 
   //----------------------------
 
-  for (;;)
-  {
     Menu();
-  }
+
+
 } //------ Fin d'Interface
 
 void Commande (char code)
@@ -95,16 +94,18 @@ void Commande (char code)
 {
   switch ( code )
   {
-    case 'F':
+    case CMD_FERMETURE :
       // Destruction de la tache en cour et fin de l'application
       FermerInterface();
     break;
 
-    case 'G':
+    case CMD_GENE :
     // Arret du generateur si actif actuellement, sinon mise en route du gene 
       if (bGeneLaunched==true)
       {
         kill (pidGene, SIGSTOP);
+
+        // Display
         Effacer(ETAT_GENERATEUR);
         Afficher(ETAT_GENERATEUR, "OFF");
         Effacer(MESSAGE);
@@ -114,6 +115,8 @@ void Commande (char code)
       else 
       {
         kill (pidGene, SIGCONT);
+
+        // Display
         Effacer(ETAT_GENERATEUR);
         Afficher(ETAT_GENERATEUR, " ON");
         Effacer(MESSAGE);
@@ -125,7 +128,7 @@ void Commande (char code)
     default:
     // Commande non reconnue par le parsseur
       Effacer(MESSAGE);
-      Afficher(MESSAGE, "ERREUR | Commande non conforme");
+      Afficher(MESSAGE, "On est dans la merde !");
     break;
   }
 } //------ Fin de Commande (char code)
@@ -133,10 +136,6 @@ void Commande (char code)
 void Commande (TypeVoie entree, TypeVoie sortie)
 // Algorithme : Creation de la voiture, du message puis ajout dans la BAL
 {
-  Voiture aVoiture;
-  MsgVoiture msg;
-  size_t msgSize;
-
   // Modification du numero de la voiture a creer
   if (numVoiture < NUM_VOITURE_MAX)
   {
@@ -147,16 +146,11 @@ void Commande (TypeVoie entree, TypeVoie sortie)
     numVoiture = 1 ;
   }
 
-  // Mise en place de la voiture
-  aVoiture.entree = entree;
-  aVoiture.sortie = sortie;
-  aVoiture.numero  = numVoiture;
+  // Creation des structures
+  struct Voiture aVoiture = {entree, sortie, numVoiture};
+  struct MsgVoiture msg = {(long)(entree), aVoiture};
 
-  // Mise en place du message
-  msg.uneVoiture = aVoiture;
-  msg.type = msg.uneVoiture.entree;
-
-  msgSize = sizeof(msg);
+  size_t msgSize = sizeof(msg);
 
   msgsnd(myBAL, &msg, msgSize, 0);
 

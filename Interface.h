@@ -21,6 +21,8 @@
 
 //------------------------------------------------------------- Constantes
 const int NUM_VOITURE_MAX = 299 ;
+const char CMD_FERMETURE = 'F';
+const char CMD_GENE = 'G';
 
 //------------------------------------------------------------------ Types
 
