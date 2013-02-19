@@ -16,6 +16,7 @@
 #include <sys/shm.h>
 #include <sys/msg.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include <Voiture.h>
 #include <Outils.h>
@@ -131,19 +132,23 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
 
       if (nVoie == NORD || nVoie == SUD)
       {
-        if (feux->nS)
+        while (!feux->nS)
         {
-          pid_t voitureBouge =DeplacerVoiture(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
-          vectDeplacement.push_back(voitureBouge);
+          sleep(1);
         }
+        
+        pid_t voitureBouge =DeplacerVoiture(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
+        vectDeplacement.push_back(voitureBouge);
       }
       else
       {
-        if (feux->eO)
+        while (!feux->eO)
         {
-          pid_t voitureBouge =DeplacerVoiture(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
-          vectDeplacement.push_back(voitureBouge);
+          sleep(1);
         }
+
+        pid_t voitureBouge =DeplacerVoiture(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
+        vectDeplacement.push_back(voitureBouge);
       }
     }
 
