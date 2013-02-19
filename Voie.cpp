@@ -55,9 +55,6 @@ static void  handlerFinTache (int typeSignal)
       it++;
     }
 
-    // Supression handlers
-
-
     // Détachement de la mémoire
     shmdt (feux);
 
@@ -75,6 +72,7 @@ static void handlerFinDeplacement (int typeSignal)
     int etat;
     pid_t pidFils=wait(&etat);
     std::vector<pid_t> ::iterator it;
+    it=vectDeplacement.begin();
     while ((*it)!=pidFils)
     {
       it++;
