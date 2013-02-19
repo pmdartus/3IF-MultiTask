@@ -180,28 +180,28 @@ int main()
 		// Création des voies
 		if((pidVoie[0] = fork()) == 0)
 		{
-			Voie( NORD, idDuree, idFileVoiture );
+			Voie( NORD, idEtatFeux, idFileVoiture );
 		}
 		else
 		{
 			if((pidVoie[1] = fork()) == 0)
 			{
 				//Voie(1);
-				Voie( SUD, idDuree, idFileVoiture );
+				Voie( SUD, idEtatFeux, idFileVoiture );
 			}
 			else
 			{
 				if((pidVoie[2] = fork()) == 0)
 				{
 					//Voie(2);
-					Voie( EST, idDuree, idFileVoiture );
+					Voie( EST, idEtatFeux, idFileVoiture );
 				}
 				else
 				{
 					if((pidVoie[3] = fork()) == 0)
 					{
 						//Voie(3);
-						Voie( OUEST, idDuree, idFileVoiture );
+						Voie( OUEST, idEtatFeux, idFileVoiture );
 					}
 					else
 					{

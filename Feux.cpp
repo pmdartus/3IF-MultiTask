@@ -188,6 +188,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 		afficherDuree();
 
 		Afficher(COULEUR_AXE_NS, VERT, STANDARD, NORMALE);
+		myMemEtatFeux->nS = true;
 		for(int i = dureeNS ; i > 0 ; i--)
 		{
 			afficherNS(i, DUREE_ARRET);
@@ -196,7 +197,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 
 		Afficher(COULEUR_AXE_NS, ORANGE, STANDARD, NORMALE);
 		// Inversion de l'état de l'état du feu N-S
-		myMemEtatFeux->nS ^= true;
+		myMemEtatFeux->nS = false;
 		for(int i = 3 ; i > 0 ; i--)
 		{
 			afficherNS(i, DUREE_ROUGE);
@@ -214,7 +215,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 		afficherDuree();
 
 		// Inversion de l'état du feux E-O
-		myMemEtatFeux->eO ^= true;
+		myMemEtatFeux->eO = true;
 
 		Afficher(COULEUR_AXE_EO, VERT, STANDARD, NORMALE);
 		for(int i = dureeEO ; i > 0 ; i--)
@@ -225,7 +226,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 
 		Afficher(COULEUR_AXE_EO, ORANGE, STANDARD, NORMALE);
 		// Inversion de l'état de l'état du feux E-O
-		myMemEtatFeux->eO ^= true;
+		myMemEtatFeux->eO = false;
 		for(int i = 3 ; i > 0 ; i--)
 		{
 			afficherEO(i, DUREE_ROUGE);
@@ -240,7 +241,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 		}
 
 		// Inversion de l'état de l'état du feu N-S
-		myMemEtatFeux->nS ^= true;
+		myMemEtatFeux->nS = true;
 	}
 
 } //----- fin de ActiverFeux
