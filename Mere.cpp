@@ -124,7 +124,12 @@ int main()
 // - Attente de la fin de l'interface
 // - Destruction dans l'ordre inverse de création
 {
-    pid_t pidHeure;
+
+	//------------------//
+	//  Initialisation  //
+	//------------------//
+    
+	pid_t pidHeure;
     pid_t pidInterface;
     pid_t pidVoie[4];
     pid_t pidFeux;
@@ -180,27 +185,28 @@ int main()
 		// Création des voies
 		if((pidVoie[0] = fork()) == 0)
 		{
+			// Voie NORD
 			Voie( NORD, idEtatFeux, idFileVoiture );
 		}
 		else
 		{
 			if((pidVoie[1] = fork()) == 0)
 			{
-				//Voie(1);
+				// Voie SUD
 				Voie( SUD, idEtatFeux, idFileVoiture );
 			}
 			else
 			{
 				if((pidVoie[2] = fork()) == 0)
 				{
-					//Voie(2);
+					// Voie EST
 					Voie( EST, idEtatFeux, idFileVoiture );
 				}
 				else
 				{
 					if((pidVoie[3] = fork()) == 0)
 					{
-						//Voie(3);
+						// Voie OUEST
 						Voie( OUEST, idEtatFeux, idFileVoiture );
 					}
 					else
@@ -213,6 +219,10 @@ int main()
 						}
 						else
 						{
+							
+							//------------------//
+							//    Destrution    //
+							//------------------//
 
 							// Synchronisation de fin
 							waitpid(pidInterface, NULL, 0);

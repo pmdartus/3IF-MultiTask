@@ -52,23 +52,15 @@ static struct sembuf reserver = {0, -1, 0};
 static struct sembuf liberer = {0, 1, 0};
 
 //------------------------------------------------------ Fonctions privées
-//static type nom ( liste de parametres )
-// Mode d'emploi :
-//
-// Contrat :
-//
-// Algorithme :
-//
-//{
-//} //----- fin de nom
 
 static void destruction(int noSignal)
 // Mode d'emploi :
-//
+// Provoque la fin propre de la tâche
 // Contrat : 
-// 
+// Aucun
 // Algorithme :
-//
+// Détache les zones de mémoires Duree et EtatFeux puis
+// termine la tâche
 {
 	shmdt(myMemEtatFeux);
 	shmdt(myMemDuree);
@@ -77,11 +69,11 @@ static void destruction(int noSignal)
 
 static void afficherDuree()
 // Mode d'emploi :
-//
+// Affiche les durées des feux dans les zones adéquates
 // Contrat :
-//
+// Aucun
 // Algorithme :
-//
+// Trivial
 {
 	Afficher(DUREE_AXE_NS, dureeNS, STANDARD, NORMALE);
 	Afficher(DUREE_AXE_EO, dureeEO, STANDARD, NORMALE);
@@ -89,11 +81,12 @@ static void afficherDuree()
 
 static void afficherNS(int duree, int dureeSup)
 // Mode d'emploi :
-//
+// Affiche le temps duree sur la zone d'affichage de l'axe N-S
+// Affiche le temps duree+dureeSup sur la zone d'affiche de l'axe E-O
 // Contrat :
-//
+// Aucun
 // Algorithme :
-//
+// Trivial
 {
 	Afficher(TEMPS_AXE_NS, duree, STANDARD, NORMALE);
 	Afficher(TEMPS_AXE_EO, duree + dureeSup, STANDARD, NORMALE);
@@ -101,11 +94,12 @@ static void afficherNS(int duree, int dureeSup)
 
 static void afficherEO(int duree, int dureeSup)
 // Mode d'emploi :
-//
+// Affiche le temps duree sur la zone d'affichage de l'axe E-O
+// Affiche le temps duree+dureeSup sur la zone d'affiche de l'axe N-S
 // Contrat :
-//
+// Aucun
 // Algorithme :
-//
+// Trivial
 {
 	Afficher(TEMPS_AXE_EO, duree, STANDARD, NORMALE);
 	Afficher(TEMPS_AXE_NS, duree + dureeSup, STANDARD, NORMALE);
@@ -113,11 +107,13 @@ static void afficherEO(int duree, int dureeSup)
 
 static void majDuree()
 // Mode d'emploi :
-//
+// Mets à jour les durées des feux E-O et N-S
 // Contrat :
-//
+// Aucun
 // Algorithme :
-//
+//	- Prends un jeton du sémaphore de protection de la zone de mémoire Duree
+//	- Lis les valeurs eO et nS de Duree et les stocke dans dureeEO et dureeNS
+//	- Rends le jeton du sémaphore
 {
 	semop(myIdDuree, &reserver, 1);
 	dureeEO = myMemDuree->eO;
@@ -127,11 +123,16 @@ static void majDuree()
 
 static void initialisation()
 // Mode d'emploi :
-//
+// Initialise la tâche Feux
 // Contrat :
-//
+// Les variables myIdEtatFeux, myIdDuree et myIdSem doivent être déjà initialisées
 // Algorithme :
-//
+//	- Attache les zones mémoires EtatFeux et Duree
+//	- Mets à jour les durées des feux
+//	- Passe l'état du feu N-S à vrai
+//	- Affiche les couleurs des feux
+//	- Affiche les temps initiaux des feux
+//	- Affiche les durées initiales des feux
 {
 	// Attachement des zones de mémoires partagées
 	myMemEtatFeux = (EtatFeux*) shmat(myIdEtatFeux, NULL, 0);
@@ -147,26 +148,28 @@ static void initialisation()
 	Afficher(COULEUR_AXE_NS, VERT, GRAS, INVERSE);
 	Afficher(COULEUR_AXE_EO, ROUGE, GRAS, INVERSE);
 
-	// Affichage des durées initiales
+	// Affichage des temps initiaux
 	Afficher(TEMPS_AXE_NS, dureeNS, STANDARD, NORMALE);
 	Afficher(TEMPS_AXE_EO, dureeNS + DUREE_ARRET, STANDARD, NORMALE);
+
+	// Affichage des durées initiales
 	afficherDuree();
 } //----- fin de initialisation
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-//type Nom ( liste de parametres )
-// Algorithme :
-//
-//{
-//} //----- fin de Nom
 
 void ActiverFeux(int etatFeux, int duree, int sem)
 // Mode d'emploi :
-//
+// Lance le fonctionnement de la tâche Feux
 // Contrat :
-//
+// Les zones de mémoires EtatFeux, Duree et le mutex de Duree doivent
+// être déjà créés.
 {
+	//------------------//
+	//  Initialisation  //
+	//------------------//
+
 	// Mise en place du handler de destruction
 	struct sigaction fin;
 	fin.sa_handler = destruction;
@@ -182,8 +185,14 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 
 	initialisation();
 
+
+	//------------------//
+	//      Moteur      //
+	//------------------//
+
 	for( ; ; )
 	{
+		// Mise à jour des durées
 		majDuree();
 		afficherDuree();
 
@@ -211,6 +220,7 @@ void ActiverFeux(int etatFeux, int duree, int sem)
 			sleep(1);
 		}
 
+		// Mise à jour des durées
 		majDuree();
 		afficherDuree();
 
