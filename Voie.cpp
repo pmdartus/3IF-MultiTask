@@ -126,9 +126,7 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
     // Attente de la prochaine voiture à traiter par la voie en question
     if(msgrcv(myBAL, &msg, TAILLE_MSG_VOITURE, nVoie, 1)!=-1)
     {     
-		Afficher(MESSAGE, "Récéption voiture.");
       DessinerVoitureFeu(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
-	  Afficher(MESSAGE, "Déplacement...");
       OperationVoie (MOINS, nVoie);
 
       if (nVoie == NORD || nVoie == SUD)

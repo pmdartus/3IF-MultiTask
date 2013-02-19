@@ -12,7 +12,7 @@
 
 //------------------------------------------------------------------------
 // Rôle de la tache <Feux>
-// Gère le changement de couleur des feux.
+// Gère le changement de couleur et d'état des feux.
 //
 //------------------------------------------------------------------------
 
