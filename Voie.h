@@ -12,8 +12,7 @@
 
 //------------------------------------------------------------------------
 // Rôle de la tache <Voie>
-//
-//
+// Affichage et déplacement des voitures pour chaque voies
 //------------------------------------------------------------------------
 
 /////////////////////////////////////////////////////////////////  INCLUDE
@@ -27,9 +26,13 @@
 //---------------------------------------------------- Fonctions publiques
 void Voie( TypeVoie numVoie, int idFeu, int idFile );
 // Mode d'emploi :
-//
+//	<numVoie>	: position de la voie dans le carrefour
+//	<idFeu>		: id de la zone mémoire partagée contenant l'état des 
+//				  feux
+//	<idFile>	: id de la boite au lettre contenant les MsgVoitures
+// - Réception des messages et traitement des voitures
 // Contrat :
-//
+// Aucun
 
 #endif // VOIE_H
 

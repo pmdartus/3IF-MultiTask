@@ -43,6 +43,9 @@ static std::vector<pid_t> vectDeplacement;
 //------------------------------------------------------ Fonctions privées
 
 static void  handlerFinTache (int typeSignal)
+// Algorithme :
+// Parcourt de la structure de donnée, et on tue toutes les taches de 
+// déplacement en cours, avant de quitter la tache
 {
   if (typeSignal == SIGUSR2)
   {
@@ -64,6 +67,9 @@ static void  handlerFinTache (int typeSignal)
 }
 
 static void handlerFinDeplacement (int typeSignal)
+// Algorithme :
+// Recherche du pid de la tache ayant envoyé le signal, et suppression
+// du pid de la structure de donnée existante
 {
   if (typeSignal == SIGCHLD)
   {
@@ -85,7 +91,10 @@ static void handlerFinDeplacement (int typeSignal)
 //---------------------------------------------------- Fonctions publiques
 void Voie( TypeVoie numVoie, int idFeu, int idFile )
 // Algorithme :
-//
+// Phase d'initilisation triviale
+// Phase moteur : attente d'une voiture dans la BAL pui affichage de celle - ci
+// Une fois affichée, on attend que le feux passe au vert et on déplace la voiture
+// après l'avoir ajoutée à la structure de donnée stoquant les voitures en déplacement
 {
 
   //----------------------------
@@ -124,27 +133,32 @@ void Voie( TypeVoie numVoie, int idFeu, int idFile )
   {
     // Attente de la prochaine voiture à traiter par la voie en question
     if(msgrcv(myBAL, &msg, TAILLE_MSG_VOITURE, nVoie, 1)!=-1)
-    {     
+    {
+      // Display     
       DessinerVoitureFeu(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
       OperationVoie (MOINS, nVoie);
 
       if (nVoie == NORD || nVoie == SUD)
       {
+        // Attente du passage du feux au vert
         while (!feux->nS)
         {
           sleep(1);
         }
         
+        // Création de la tache de déplacement de la voiture et ajout à la liste des tache en execution
         pid_t voitureBouge =DeplacerVoiture(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
         vectDeplacement.push_back(voitureBouge);
       }
       else
       {
+        // Attente du passage du feux au vert
         while (!feux->eO)
         {
           sleep(1);
         }
 
+        // Création de la tache de déplacement de la voiture et ajout à la liste des tache en execution
         pid_t voitureBouge =DeplacerVoiture(msg.uneVoiture.numero, msg.uneVoiture.entree, msg.uneVoiture.sortie);
         vectDeplacement.push_back(voitureBouge);
       }
